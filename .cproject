@@ -35,6 +35,7 @@
 								<option id="gnu.c.compiler.option.debugging.level.1792306248" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.991674561" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Inc"/>
+									<listOptionValue builtIn="false" value="../Drivers/snake"/>
 									<listOptionValue builtIn="false" value="../Drivers/I2Cdev"/>
 									<listOptionValue builtIn="false" value="../Drivers/display"/>
 									<listOptionValue builtIn="false" value="../Drivers/MPU9250"/>

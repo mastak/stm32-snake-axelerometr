@@ -42,6 +42,7 @@
 #include "bmp280.h"
 #include "MPU9250.h"
 #include "MadgwickAHRS.h"
+#include "snake.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -54,6 +55,8 @@ float gx, gy, gz;
 float mx, my, mz;
 
 uint32_t lastTime, currentTime, drawTime;
+
+volatile Direction current_direction = BOTTOM;
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE END PV */
@@ -75,7 +78,12 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+    SnakePoint *SnakeHead = NULL;
+    SnakePoint *SnakeTail = NULL;
 
+    SnakePoint *tmp_snake = NULL;
+
+    uint32_t next_render_tick = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -100,7 +108,6 @@ int main(void)
   I2Cdev_init(&hi2c1);
 
   I2C_ScanBus();
-
   LCD_Printf("Connecting to BMP280...\n");
   bmp280_t bmp280;
   com_rslt = BMP280_init(&bmp280);
@@ -125,6 +132,16 @@ int main(void)
   lastTime = drawTime = HAL_GetTick();
 
   
+  SNAKE_init(&SnakeHead, &SnakeTail, SNAKE_LEN, POINT_SIZE);
+
+
+  tmp_snake = SnakeHead;
+  while(tmp_snake != NULL) {
+    drow_point(tmp_snake->position, SNAKE_COLOR);
+    tmp_snake = tmp_snake->prev;
+  }
+
+
   while (1)
   {
     BMP280_read_temperature_double(&temp);
@@ -141,10 +158,21 @@ int main(void)
       LCD_SetCursor(0, 64);
       LCD_Printf("T: %6.2f C  P: %6.0f Pa  A: %3.0f m\n", temp, press, alt);
       LCD_Printf("Accel:   %7.4f %7.4f %7.4f\n", ax, ay, az);
-      LCD_Printf("Gyro:    %7.4f %7.4f %7.4f\n", gx, gy, gz);
-      LCD_Printf("Compass: %7.1f %7.1f %7.1f\n\n", mx, my, mz);
-      LCD_Printf("Madgwick: P: %5.1f R: %5.1f Y: %5.1f\n", Madgwick_getPitch(), Madgwick_getRoll(), Madgwick_getYaw());
+      // LCD_Printf("Gyro:    %7.4f %7.4f %7.4f\n", gx, gy, gz);
+      // LCD_Printf("Compass: %7.1f %7.1f %7.1f\n\n", mx, my, mz);
+      // LCD_Printf("Madgwick: P: %5.1f R: %5.1f Y: %5.1f\n", Madgwick_getPitch(), Madgwick_getRoll(), Madgwick_getYaw());
       drawTime = HAL_GetTick();
+    }
+
+
+
+    if (next_render_tick < currentTime) {
+      next_render_tick = currentTime + TPF;
+      SNAKE_add_point(&SnakeHead, &SnakeTail, current_direction, POINT_SIZE);
+      drow_point(SnakeTail->position, BG_COLOR);
+      SNAKE_remove_last_point(&SnakeTail);
+
+      drow_point(SnakeHead->position, SNAKE_COLOR);
     }
   /* USER CODE END WHILE */
 
