@@ -43,6 +43,9 @@
 #include "MPU9250.h"
 #include "MadgwickAHRS.h"
 #include "snake.h"
+
+#define abs(x)  (x < 0) ? -x : x
+#define max(x, y)  x > y ? x : y
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -67,7 +70,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+void set_direction(float ax, float ay);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -112,10 +115,18 @@ int main(void)
   bmp280_t bmp280;
   com_rslt = BMP280_init(&bmp280);
   com_rslt += BMP280_set_power_mode(BMP280_NORMAL_MODE);
+  if (com_rslt != SUCCESS) {
+    LCD_Printf("1Check BMP280 connection!\nProgram terminated");
+    return 0;
+  }
   com_rslt += BMP280_set_work_mode(BMP280_STANDARD_RESOLUTION_MODE);
+  if (com_rslt != SUCCESS) {
+    LCD_Printf("2Check BMP280 connection!\nProgram terminated");
+    return 0;
+  }
   com_rslt += BMP280_set_standby_durn(BMP280_STANDBY_TIME_1_MS);
   if (com_rslt != SUCCESS) {
-    LCD_Printf("Check BMP280 connection!\nProgram terminated");
+    LCD_Printf("3Check BMP280 connection!\nProgram terminated");
     return 0;
   }
   LCD_Printf("Connection successful!\n");
@@ -164,9 +175,9 @@ int main(void)
       drawTime = HAL_GetTick();
     }
 
-
-
     if (next_render_tick < currentTime) {
+      set_direction(ax, ay);
+
       next_render_tick = currentTime + TPF;
       SNAKE_add_point(&SnakeHead, &SnakeTail, current_direction, POINT_SIZE);
       drow_point(SnakeTail->position, BG_COLOR);
@@ -254,6 +265,42 @@ void I2C_ScanBus() {
     if (HAL_I2C_IsDeviceReady(&hi2c1, i << 1, 10, 100) == HAL_OK)
       LCD_Printf("Ready: 0x%02x\n", i);
   }
+}
+
+
+void set_direction(float ax, float ay) {
+  float a_ax = abs(ax),
+        a_ay = abs(ay), 
+        maxAbs = max(a_ax, a_ay);
+  Direction new_direction;  
+
+  LCD_Printf("VALUES: %1.2f %1.2f %1.2f %1.2f %1.2f\n", ax, ay, a_ax, a_ay, maxAbs);
+  if (maxAbs < 0.3) return;
+  
+  if (a_ax > a_ay) {
+    if (ax > 0.0) {
+      new_direction = RIGHT;
+    }
+    else {
+      new_direction = LEFT;
+    }
+  }
+  else {
+    if (ay > 0.0) {
+      new_direction = TOP;
+    }
+    else {
+      new_direction = BOTTOM; 
+    }
+  }
+  if ((current_direction == TOP && new_direction == BOTTOM) ||
+        (current_direction == BOTTOM && new_direction == TOP) ||
+        (current_direction == RIGHT && new_direction == LEFT) ||
+        (current_direction == LEFT && new_direction == RIGHT)) {
+      return;
+  }
+  current_direction = new_direction;
+
 }
 /* USER CODE END 4 */
 

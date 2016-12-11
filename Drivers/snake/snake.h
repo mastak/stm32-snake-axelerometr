@@ -1,32 +1,12 @@
-#ifndef TPF
-    #define TPF 100  // ticks per frame (like FPS in games)
-#endif
-#ifndef SNAKE_LEN
-    #define SNAKE_LEN 50
-#endif
-#ifndef SNAKE_COLOR
-    #define SNAKE_COLOR 200
-#endif
-#ifndef BG_COLOR
-    #define BG_COLOR 0
-#endif
-#ifndef POINT_SIZE
-    #define POINT_SIZE 3
-#endif
-
-#ifndef SNAKE_X_START
-    #define SNAKE_X_START 0
-#endif
-#ifndef SNAKE_X_END
-    #define SNAKE_X_END 230
-#endif
-#ifndef SNAKE_Y_START
-    #define SNAKE_Y_START 100
-#endif
-#ifndef SNAKE_Y_END
-    #define SNAKE_Y_END 310
-#endif
-
+#define TPF 100  // ticks per frame (like FPS in games)
+#define SNAKE_LEN 50
+#define SNAKE_COLOR 240
+#define BG_COLOR 0
+#define POINT_SIZE 3
+#define SNAKE_X_START 0
+#define SNAKE_X_END 230
+#define SNAKE_Y_START 100
+#define SNAKE_Y_END 310
 
 
 typedef enum Direction {
